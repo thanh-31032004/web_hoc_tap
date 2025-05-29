@@ -1,7 +1,7 @@
 // src/routes/userRoutes.js
 import express from 'express';
-import { getUserProfile, updateUserProfile } from '../controller/Usercontroller';
-import { protect } from '../middleware/middleware'; // Import middleware bảo vệ
+import { getUserProfile, updateUserProfile } from '../controller/Usercontroller.js';
+import { protect } from '../middleware/middleware.js'; // Import middleware bảo vệ
 
 const userRoute = express.Router();
 

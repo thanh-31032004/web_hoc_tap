@@ -14,7 +14,7 @@ courseRoute.get('/', getCourses);
 courseRoute.get('/:id', getCourseById);
 
 // Protected routes: Chỉ admin/instructor mới có thể tạo khóa học
-courseRoute.post('/', protect, authorizeRoles('admin', 'instructor'), createCourse);
+courseRoute.post('/', createCourse);
 
 // Bạn có thể thêm các route cho việc cập nhật, xóa khóa học, module, bài học ở đây
 // courseRoute.put('/:id', protect, authorizeRoles('admin', 'instructor'), updateCourse);
