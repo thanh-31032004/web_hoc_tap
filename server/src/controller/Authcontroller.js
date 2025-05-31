@@ -67,11 +67,13 @@ export const loginUser = async (req, res) => {
 
         // 3. Gửi phản hồi thành công với token
         res.status(200).json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
             token: generateToken(user._id),
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
         });
 
     } catch (error) {

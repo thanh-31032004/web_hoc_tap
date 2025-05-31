@@ -1,119 +1,115 @@
-// client/src/pages/RegisterPage.jsx
-import React, { useState } from 'react';
-import axios from 'axios'; // Chỉ cần import axios
+// src/pages/RegisterPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { TextField, Button, Typography, Container, Box, Alert, CircularProgress } from '@mui/material';
+import {
+    TextField, Button, Typography, Container, Box,
+    Alert, CircularProgress
+} from '@mui/material';
+import { register } from '../features/auth/authSlide';
 
 function RegisterPage() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({
+        email: '',
+        username: '',
+        password: '',
+        confirmPassword: '',
+    });
+
+    const [localError, setLocalError] = useState(null);
+
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-        setLoading(true);
+    const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
-        if (password !== confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp!');
-            setLoading(false);
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/login');
+        }
+    }, [isAuthenticated, navigate]);
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (form.password !== form.confirmPassword) {
+            setLocalError('Mật khẩu và xác nhận mật khẩu không khớp.');
             return;
         }
 
-        try {
-            // Axios sẽ tự động thêm baseURL và headers.Authorization (nếu có token)
-            const response = await axios.post('/auth/register', { // Chỉ cần đường dẫn tương đối
-                username,
-                email,
-                password,
-            });
-            setSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
-            setTimeout(() => navigate('/login'), 2000); // Chuyển hướng sau 2 giây
-        } catch (err) {
-            // err.response?.data?.message sẽ chứa thông báo lỗi từ backend
-            setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
+        setLocalError(null);
+        dispatch(register({
+            email: form.email,
+            username: form.username,
+            password: form.password
+        }));
     };
 
     return (
         <Container maxWidth="sm">
-            <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Đăng ký
-                </Typography>
-                {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
-                {success && <Alert severity="success" sx={{ width: '100%', mb: 2 }}>{success}</Alert>}
-                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+            <Box sx={{ mt: 4 }}>
+                <Typography variant="h4" gutterBottom>Đăng ký</Typography>
+
+                {localError && <Alert severity="error" sx={{ mb: 2 }}>{localError}</Alert>}
+                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+                <Box component="form" onSubmit={handleSubmit}>
                     <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="username"
-                        label="Tên người dùng"
                         name="username"
-                        autoComplete="username"
-                        autoFocus
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <TextField
+                        fullWidth
+                        label="Tên người dùng"
+                        value={form.username}
+                        onChange={handleChange}
                         margin="normal"
                         required
-                        fullWidth
-                        id="email"
-                        label="Địa chỉ Email"
+                    />
+                    <TextField
                         name="email"
-                        autoComplete="email"
+                        fullWidth
+                        label="Email"
+                        value={form.email}
+                        onChange={handleChange}
+                        margin="normal"
+                        required
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <TextField
-                        margin="normal"
-                        required
-                        fullWidth
                         name="password"
-                        label="Mật khẩu"
                         type="password"
-                        id="password"
-                        autoComplete="new-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <TextField
+                        fullWidth
+                        label="Mật khẩu"
+                        value={form.password}
+                        onChange={handleChange}
                         margin="normal"
                         required
-                        fullWidth
-                        name="confirmPassword"
-                        label="Xác nhận mật khẩu"
-                        type="password"
-                        id="confirmPassword"
-                        autoComplete="new-password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
                     />
+                    <TextField
+                        name="confirmPassword"
+                        type="password"
+                        fullWidth
+                        label="Xác nhận mật khẩu"
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        margin="normal"
+                        required
+                    />
+
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                        disabled={loading} // Vô hiệu hóa nút khi đang tải
+                        disabled={loading}
+                        sx={{ mt: 2 }}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> : 'Đăng ký'}
                     </Button>
-                    <Typography variant="body2" align="center">
-                        Bạn đã có tài khoản?{' '}
-                        <RouterLink to="/login" style={{ textDecoration: 'none', color: '#1976d2' }}>
-                            Đăng nhập ngay
-                        </RouterLink>
+
+                    <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+                        Đã có tài khoản? <RouterLink to="/login">Đăng nhập</RouterLink>
                     </Typography>
                 </Box>
             </Box>
