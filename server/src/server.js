@@ -5,7 +5,10 @@ import router from "./routes/index.js"; // Import router từ file index.js tron
 import dotenv from "dotenv";
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // 👈 frontend chạy ở đây (Vite React)
+  credentials: true
+}));
 
 app.use(
   express.urlencoded({

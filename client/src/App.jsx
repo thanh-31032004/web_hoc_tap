@@ -16,6 +16,7 @@ import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 // import NotFoundPage from './pages/NotFoundPage';
+import ProtectedRoute from './components/ProrectedRoute';
 
 // Import ProtectedRoute (nếu bạn đã có)
 
@@ -32,12 +33,15 @@ function App() {
           <Route path="/courses/:id" element={<CourseDetailPage />} />
           <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
 
-          {/* Protected Routes - Chỉ người dùng đã đăng nhập mới truy cập được */}
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
+          <Route element={<ProtectedRoute />}> {/* Áp dụng cho tất cả các route con */}
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
+          </Route>
 
-          {/* Các route quản trị (ví dụ, nếu có) */}
-          {/* <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} /> */}
+          {/* Route dành riêng cho Admin */}
+          {/* <Route element={<ProtectedRoute allowedRoles={['admin']} />}> */}
+          {/* <Route path="/admin/dashboard" element={<AdminDashboardPage />} /> */}
+          {/* </Route> */}
 
           {/* Catch-all route cho các URL không khớp */}
           {/* <Route path="**" element={<NotFoundPage />} /> */}
