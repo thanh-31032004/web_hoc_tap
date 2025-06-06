@@ -6,8 +6,6 @@ import Layout from './layout/Layout'; // Đảm bảo đường dẫn đúng
 
 // Import các Pages của bạn
 import HomePage from './pages/HomePage';
-
-
 import CourseListPage from './pages/CourseListPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import LessonPage from './pages/LessonPage';
@@ -15,8 +13,16 @@ import AiRoadmapPage from './pages/AiRoadmapPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
-// import NotFoundPage from './pages/NotFoundPage';
+import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProrectedRoute';
+import AdminLayout from './layout/AdminLayout';
+import AdminDashboardPage from './pages/admin/DashboardPage';
+import AdminCourseListPage from './pages/admin/courses/ListCourse';
+import AdminCourseCreatePage from './pages/admin/courses/AddCourse';
+import AdminCourseEditPage from './pages/admin/courses/EditCourse';
+import AdminLessonListPage from './pages/admin/lesson/lessonList';
+import AdminLessonAddPage from './pages/admin/lesson/lessonAdd';
+import AdminLessonEditPage from './pages/admin/lesson/lessonEdit';
 
 // Import ProtectedRoute (nếu bạn đã có)
 
@@ -26,26 +32,30 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route index element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/courses" element={<CourseListPage />} />
           <Route path="/courses/:id" element={<CourseDetailPage />} />
           <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
 
-          <Route element={<ProtectedRoute />}> {/* Áp dụng cho tất cả các route con */}
+          <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
           </Route>
-
-          {/* Route dành riêng cho Admin */}
-          {/* <Route element={<ProtectedRoute allowedRoles={['admin']} />}> */}
-          {/* <Route path="/admin/dashboard" element={<AdminDashboardPage />} /> */}
-          {/* </Route> */}
-
-          {/* Catch-all route cho các URL không khớp */}
-          {/* <Route path="**" element={<NotFoundPage />} /> */}
         </Route>
+        {/* Các route dành cho Admin */}
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+          <Route path='' element={<AdminDashboardPage />} />
+          <Route path="courses" element={<AdminCourseListPage />} />
+          <Route path="courses/create" element={<AdminCourseCreatePage />} />
+          <Route path="courses/edit/:id" element={<AdminCourseEditPage />} />
+          <Route path="lessons" element={<AdminLessonListPage />} />
+          <Route path="lessons/create" element={<AdminLessonAddPage />} />
+          <Route path="lessons/edit/:id" element={<AdminLessonEditPage />} />
+
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -14,11 +14,11 @@ const CourseSchema = new mongoose.Schema({
     },
     thumbnail: { // Đường dẫn tới ảnh đại diện của khóa học
         type: String,
-        default: '/images/default_course_thumbnail.jpg'
+        required: [true, 'Ảnh đại diện là bắt buộc'],
     },
     category: {
         type: String,
-        enum: ['Web Development', 'Mobile Development', 'Data Science', 'AI/ML', 'DevOps', 'Cybersecurity', 'Game Development', 'Others'],
+        enum: ['Web Development', 'Mobile Development', 'Data Science', 'Game Development'],
         required: [true, 'Danh mục là bắt buộc']
     },
     difficulty: {

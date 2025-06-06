@@ -6,6 +6,7 @@ import {
     getLessonById,
     updateLesson,
     deleteLesson,
+    getAllLessons,
 } from '../controller/Lessioncontroller.js'; // Đảm bảo đường dẫn đúng
 
 // import { protect, authorize } from '../middleware/authMiddleware.js'; // Nếu bạn đã có middleware xác thực
@@ -21,7 +22,7 @@ const lessonRouter = Router();
 // Routes công khai (mọi người đều có thể xem)
 lessonRouter.get('/course/:courseId', getLessonsByCourse); // Lấy bài học theo Course ID
 lessonRouter.get('/:id', getLessonById); // Lấy bài học theo Lesson ID
-
+lessonRouter.get('/', getAllLessons)
 // Nếu bạn chưa có middleware xác thực, có thể tạm thời để public để test:
 lessonRouter.post('/', createLesson);
 lessonRouter.put('/:id', updateLesson);
