@@ -3,7 +3,9 @@ import express from 'express';
 import {
     getCourses,
     getCourseById,
-    createCourse // Chỉ dành cho admin/instructor
+    createCourse, // Chỉ dành cho admin/instructor
+    updateCourse,
+    deleteCourse
 } from '../controller/Coursecontroller';
 import { protect, authorizeRoles } from '../middleware/middleware';
 
@@ -17,7 +19,7 @@ courseRoute.get('/:id', getCourseById);
 courseRoute.post('/', createCourse);
 
 // Bạn có thể thêm các route cho việc cập nhật, xóa khóa học, module, bài học ở đây
-// courseRoute.put('/:id', protect, authorizeRoles('admin', 'instructor'), updateCourse);
-// courseRoute.delete('/:id', protect, authorizeRoles('admin', 'instructor'), deleteCourse);
+courseRoute.put('/:id', updateCourse);
+courseRoute.delete('/:id', deleteCourse);
 
 export default courseRoute;
