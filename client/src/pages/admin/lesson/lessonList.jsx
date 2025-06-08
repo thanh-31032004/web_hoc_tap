@@ -65,7 +65,9 @@ const AdminLessonListPage = () => {
                             {list.map((lesson) => (
                                 <TableRow key={lesson._id}>
                                     <TableCell>{lesson.title}</TableCell>
-                                    <TableCell>{lesson.description}</TableCell>
+                                    <TableCell>  {lesson.description.length > 100
+                                        ? `${lesson.description.slice(0, 20)}...`
+                                        : lesson.description}</TableCell>
                                     <TableCell>
                                         {typeof lesson.course === 'object'
                                             ? lesson.course.title

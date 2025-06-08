@@ -75,7 +75,9 @@ const AdminLessonAddPage = () => {
                 <InputLabel>Khóa học</InputLabel>
                 <Select
                     name="course"
-                    value={formData.course}
+                    value={
+                        courses.find(c => c._id === formData.course) ? formData.course : ''
+                    }
                     onChange={handleChange}
                     label="Khóa học"
                 >

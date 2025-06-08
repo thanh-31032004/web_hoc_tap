@@ -23,6 +23,7 @@ import AdminCourseEditPage from './pages/admin/courses/EditCourse';
 import AdminLessonListPage from './pages/admin/lesson/lessonList';
 import AdminLessonAddPage from './pages/admin/lesson/lessonAdd';
 import AdminLessonEditPage from './pages/admin/lesson/lessonEdit';
+import CourseDeltailPage from './pages/CourseDetailPage';
 
 // Import ProtectedRoute (nếu bạn đã có)
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route path='' element={<AdminDashboardPage />} />
           <Route path="courses" element={<AdminCourseListPage />} />
+          <Route path="courses/:id" element={<CourseDeltailPage />} />
           <Route path="courses/create" element={<AdminCourseCreatePage />} />
           <Route path="courses/edit/:id" element={<AdminCourseEditPage />} />
           <Route path="lessons" element={<AdminLessonListPage />} />
