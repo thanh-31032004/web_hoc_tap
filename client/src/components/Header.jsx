@@ -18,6 +18,12 @@ function Header() {
         navigate('/login');
     };
 
+    const handleGoToProfile = () => {
+        sessionStorage.setItem('profileReloaded', 'false');
+        navigate('/profile');
+        window.location.reload();
+    };
+
     const renderAvatar = () => {
         if (user?.avatar) {
             return <Avatar alt={user.username} src={user.avatar} />;
@@ -39,6 +45,7 @@ function Header() {
 
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 2 }}>
                     <Button color="inherit" component={Link} to="/courses">Khóa học</Button>
+
                     {isAuthenticated ? (
                         <>
                             <Button color="inherit" component={Link} to="/ai-roadmap">Lộ trình AI</Button>
@@ -47,12 +54,8 @@ function Header() {
                                 <Button color="inherit" component={Link} to="/admin/dashboard">Admin</Button>
                             )}
 
-                            <Button color="inherit" component={Link} to="/profile">
-                                Trang cá nhân
-                            </Button>
-
                             <Tooltip title={user?.username || 'Người dùng'}>
-                                <IconButton component={Link} to="/profile" color="inherit" sx={{ p: 0 }}>
+                                <IconButton onClick={handleGoToProfile} color="inherit" sx={{ p: 0 }}>
                                     {renderAvatar()}
                                 </IconButton>
                             </Tooltip>
