@@ -1,4 +1,3 @@
-// src/models/UserProgress.js
 import mongoose from 'mongoose';
 
 const UserProgressSchema = new mongoose.Schema({
@@ -7,30 +6,51 @@ const UserProgressSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    lesson: { // Bài học mà người dùng đang theo dõi tiến độ
+    course: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Lesson',
+        ref: 'Course',
         required: true
     },
-    isCompleted: { // Đã hoàn thành bài học này chưa
-        type: Boolean,
-        default: false
+    completedLessons: [{
+        lesson: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Lesson'
+        },
+        completedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    lastAccessedLesson: {
+        lesson: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Lesson'
+        },
+        accessedAt: {
+            type: Date,
+            default: Date.now
+        }
     },
-    completedAt: { // Thời gian hoàn thành
-        type: Date,
-        default: null // Null nếu chưa hoàn thành
-    },
-    // Có thể thêm: progressPercentage (ví dụ: 0.5 cho 50% video), quizScore
-    quizScore: {
+    progressPercentage: {
         type: Number,
-        default: 0 // Điểm số bài quiz nếu có
+        default: 0
     }
 }, {
     timestamps: true
 });
 
-// Đảm bảo mỗi người dùng chỉ có một bản ghi tiến độ cho mỗi bài học
-UserProgressSchema.index({ user: 1, lesson: 1 }, { unique: true });
+// Middleware để tự động cập nhật progressPercentage
+UserProgressSchema.pre('save', async function (next) {
+    if (this.isModified('completedLessons')) {
+        const totalLessons = await mongoose.model('Lesson')
+            .countDocuments({ course: this.course });
+
+        this.progressPercentage = totalLessons > 0
+            ? (this.completedLessons.length / totalLessons) * 100
+            : 0;
+    }
+    next();
+});
 
 const UserProgress = mongoose.model('UserProgress', UserProgressSchema);
 export default UserProgress;

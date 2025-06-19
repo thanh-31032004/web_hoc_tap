@@ -89,7 +89,13 @@ const authSlice = createSlice({
                 state.error = action.payload;
             });
     },
+    selectors: {
+        selectIsAuthenticated: (state) => !!(state.token && state.user),
+        selectUser: (state) => state.user, // Selector cho user object
+        selectAuthLoading: (state) => state.loading,
+        selectAuthError: (state) => state.error,
+    }
 });
-
+export const { selectIsAuthenticated, selectUser, selectAuthLoading, selectAuthError } = authSlice.selectors;
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;

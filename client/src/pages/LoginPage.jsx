@@ -14,7 +14,8 @@ function LoginPage() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/profile');
+            navigate('/');
+            window.location.reload();
         }
     }, [isAuthenticated, navigate]);
 
