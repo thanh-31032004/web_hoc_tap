@@ -1,8 +1,9 @@
+import AILearningPath from "../components/AILearningPath";
+
 const AiRoadmappPage = () => {
     return (
         <div className="home-page">
-            <h1>Welcome to the Home Page</h1>
-            <p>This is the main page of our application.</p>
+            <AILearningPath />
         </div>
     );
 }
