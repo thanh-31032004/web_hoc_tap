@@ -93,10 +93,6 @@ function ProfilePage() {
                     </Button>
                 </Stack>
                 <Divider sx={{ my: 2 }} />
-                <Stack spacing={1.5}>
-                    <Typography><strong>Trình độ:</strong> {user?.skillLevel || 'Chưa cập nhật'}</Typography>
-                    <Typography><strong>Mục tiêu:</strong> {user?.learningGoals || 'Chưa cập nhật'}</Typography>
-                </Stack>
             </CardContent>
         </Card>
     );

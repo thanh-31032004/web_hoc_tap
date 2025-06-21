@@ -13,6 +13,7 @@ import {
     CardActions,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
+import AILearningPath from '../components/AILearningPath';
 
 const HomePage = () => {
     const dispatch = useDispatch();
