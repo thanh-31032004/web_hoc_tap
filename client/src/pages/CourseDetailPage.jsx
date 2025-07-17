@@ -85,9 +85,9 @@ const CourseDetailPage = () => {
     // Hiển thị lỗi
     if (coursesError || lessonsError || !course) { // Thêm !course để kiểm tra nếu không tìm thấy khóa học
         return (
-            <Container maxWidth="md" sx={{ mt: 4 }}>
-                <Alert severity="error">{coursesError || lessonsError || 'Không tìm thấy khóa học hoặc có lỗi xảy ra.'}</Alert>
-            </Container>
+
+            <Alert severity="error">{coursesError || lessonsError || 'Không tìm thấy khóa học hoặc có lỗi xảy ra.'}</Alert>
+
         );
     }
 

@@ -2,12 +2,12 @@ import React from 'react';
 import { Result, Button } from 'antd';
 import { Link } from 'react-router-dom';
 
-const NotFoundPage = () => {
+const ForbiddenPage = () => {
     return (
         <Result
-            status="404"
-            title="404"
-            subTitle="Xin lỗi, trang bạn tìm kiếm không tồn tại."
+            status="403"
+            title="403"
+            subTitle="Xin lỗi, bạn không có quyền truy cập trang này."
             extra={
                 <Button type="primary">
                     <Link to="/">Quay về trang chủ</Link>
@@ -17,4 +17,4 @@ const NotFoundPage = () => {
     );
 };
 
-export default NotFoundPage;
+export default ForbiddenPage;

@@ -6,24 +6,31 @@ import {
     getCourseProgress,
     getUserOverallProgress,
     updateCurrentLesson,
-    getCurrentLesson
+    getCurrentLesson,
+    getAllProgress
 } from '../controller/UserProgresscontroller.js';
 
 const router = express.Router();
 
-// Mark lesson as completed
-router.post('/complete-lesson', protect, markLessonAsCompleted);
+// Nhóm các route liên quan đến bài học cụ thể
+router.route('/lessons/:lessonId/status')
+    .get(protect, getLessonCompletionStatus);
 
-// Get lesson completion status
-router.get('/status/:lessonId', protect, getLessonCompletionStatus);
+router.route('/lessons/complete')
+    .post(protect, markLessonAsCompleted);
 
-// Get course progress
-router.get('/course/:courseId', protect, getCourseProgress);
+// Nhóm các route liên quan đến khóa học
+router.route('/courses/:courseId')
+    .get(protect, getCourseProgress);
 
-// Get user's overall progress across all courses
-router.get('/overall', protect, getUserOverallProgress);
+// Route tổng thể
+router.route('/overview')
+    .get(protect, getUserOverallProgress);
 
-// Update current lesson (when user starts/continues a lesson)
-router.put('/current-lesson', protect, updateCurrentLesson);
-router.get('/current-lesson', protect, getCurrentLesson);
+// Route bài học hiện tại
+router.route('/current-lesson')
+    .get(protect, getCurrentLesson)
+    .put(protect, updateCurrentLesson);
+router.get('/all', protect, getAllProgress);
+
 export default router;

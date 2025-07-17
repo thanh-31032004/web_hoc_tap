@@ -26,13 +26,10 @@ const protect = async (req, res, next) => {
     return res.status(401).json({ message: 'Không được phép, không tìm thấy token' });
 };
 
-const authorizeRoles = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({ message: `Không được phép truy cập. Chỉ ${roles.join(', ')} mới có quyền.` });
-        }
-        next();
-    };
+const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        return next(); // ✅ Kết thúc thành công
+    }
+    return res.status(403).json({ message: 'Không có quyền truy cập' }); // ✅ Không phải admin
 };
-
-export { protect, authorizeRoles };
+export { protect, isAdmin };

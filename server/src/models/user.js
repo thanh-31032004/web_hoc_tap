@@ -7,13 +7,13 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Tên người dùng là bắt buộc'],
         unique: true,
-        trim: true,   
+        trim: true,
         minlength: [3, 'Tên người dùng phải có ít nhất 3 ký tự']
     },
     email: {
         type: String,
         required: [true, 'Email là bắt buộc'],
-        unique: true, 
+        unique: true,
         trim: true,
         match: [/.+@.+\..+/, 'Email không hợp lệ']
     },
@@ -25,11 +25,11 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['student', 'instructor', 'admin'], 
+        enum: ['student', 'admin'],
         default: 'student'
     },
     learningPreferences: {
-        type:['frontend', 'backend', 'mobile'],
+        type: ['frontend', 'backend', 'mobile'],
         default: []
     },
     skillLevel: {
@@ -42,11 +42,11 @@ const UserSchema = new mongoose.Schema({
         default: ''
     },
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 // Middleware Mongoose: Mã hóa mật khẩu trước khi lưu (hash password before saving)
-UserSchema.pre('save', async function(next) {
+UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) { // Chỉ hash nếu password bị thay đổi hoặc là mới
         return next();
     }
@@ -56,7 +56,7 @@ UserSchema.pre('save', async function(next) {
 });
 
 // Phương thức để so sánh mật khẩu (so sánh mật khẩu nhập vào với mật khẩu đã hash trong DB)
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+UserSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 

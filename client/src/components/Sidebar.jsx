@@ -8,6 +8,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import BookIcon from '@mui/icons-material/Book';
 import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'; // Icon cho nút đăng xuất
+import PersonIcon from '@mui/icons-material/Person';
 
 const drawerWidth = 240; // Chiều rộng của Sidebar
 
@@ -58,14 +59,6 @@ function AdminSidebar() {
                     </ListItemButton>
                 </ListItem>
 
-                {/* Quản lý Modules */}
-                <ListItem disablePadding>
-                    <ListItemButton component={Link} to="/admin/modules">
-                        <CategoryIcon sx={{ mr: 2, color: 'rgba(255, 255, 255, 0.7)' }} />
-                        <ListItemText primary="Quản lý Modules" />
-                    </ListItemButton>
-                </ListItem>
-
                 {/* Quản lý Bài học */}
                 <ListItem disablePadding>
                     <ListItemButton component={Link} to="/admin/lessons">
@@ -87,6 +80,12 @@ function AdminSidebar() {
             {/* Nút Đăng xuất ở cuối Sidebar */}
             <Box sx={{ mt: 'auto', mb: 2 }}> {/* Đẩy xuống cuối */}
                 <List>
+                    <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/profile">
+                            <PersonIcon sx={{ mr: 2, color: 'rgba(255, 255, 255, 0.7)' }} />
+                            <ListItemText primary="Trang cá nhân" />
+                        </ListItemButton>
+                    </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout}>
                             <ExitToAppIcon sx={{ mr: 2, color: 'rgba(255, 255, 255, 0.7)' }} />

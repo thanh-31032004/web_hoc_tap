@@ -1,24 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as userProgressApi from './userProgressApi';
+import userProgressApi from './userProgressApi';
 
 const initialState = {
-    currentLesson: null,
-    completedLessons: [],
-    courseProgress: {},
-    overallProgress: null,
+    status: {}, // { [lessonId]: boolean }
+    current: null, // { lesson: {...}, accessedAt: Date }
+    byCourse: {}, // { [courseId]: { progressPercentage, ... } }
+    overview: {}, // { [courseId]: progressData }
     loading: false,
     error: null
 };
 
-// ✅ New: fetch current lesson for ProfilePage
+// Fetch bài học hiện tại
 export const fetchCurrentLesson = createAsyncThunk(
     'userProgress/fetchCurrentLesson',
     async (_, { rejectWithValue }) => {
         try {
             const response = await userProgressApi.getCurrentLesson();
-            return response;
+            return response.data.lastAccessedLesson; // Chỉ lấy dữ liệu từ response.data
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch current lesson');
+            return rejectWithValue(error.response?.data?.message || 'Không thể lấy bài học hiện tại');
         }
     }
 );
@@ -27,10 +27,10 @@ export const markLessonAsCompleted = createAsyncThunk(
     'userProgress/markLessonAsCompleted',
     async (lessonId, { rejectWithValue }) => {
         try {
-            const response = await userProgressApi.completeLesson(lessonId);
-            return response;
+            const response = await userProgressApi.markLessonAsCompleted(lessonId);
+            return response.data.progress; // Chỉ lấy dữ liệu từ response.data
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to mark lesson as completed');
+            return rejectWithValue(error.response?.data?.message || 'Không thể đánh dấu bài học hoàn thành');
         }
     }
 );
@@ -40,9 +40,12 @@ export const fetchLessonStatus = createAsyncThunk(
     async (lessonId, { rejectWithValue }) => {
         try {
             const response = await userProgressApi.getLessonStatus(lessonId);
-            return response;
+            return {
+                lessonId,
+                isCompleted: response.data.isCompleted // Chỉ lấy dữ liệu từ response.data
+            };
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch lesson status');
+            return rejectWithValue(error.response?.data?.message || 'Không thể lấy trạng thái bài học');
         }
     }
 );
@@ -52,9 +55,12 @@ export const fetchCourseProgress = createAsyncThunk(
     async (courseId, { rejectWithValue }) => {
         try {
             const response = await userProgressApi.getCourseProgress(courseId);
-            return response;
+            return {
+                courseId,
+                progress: response.data // Chỉ lấy dữ liệu từ response.data
+            };
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch course progress');
+            return rejectWithValue(error.response?.data?.message || 'Không thể lấy tiến độ khóa học');
         }
     }
 );
@@ -64,21 +70,21 @@ export const fetchOverallProgress = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await userProgressApi.getOverallProgress();
-            return response;
+            return response.data.progressByCourse; // Chỉ lấy dữ liệu từ response.data
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch overall progress');
+            return rejectWithValue(error.response?.data?.message || 'Không thể lấy tổng quan tiến độ');
         }
     }
 );
 
 export const updateCurrentLesson = createAsyncThunk(
     'userProgress/updateCurrentLesson',
-    async (data, { rejectWithValue }) => {
+    async ({ lessonId, courseId }, { rejectWithValue }) => {
         try {
-            const response = await userProgressApi.updateCurrentLesson(data);
-            return response;
+            const response = await userProgressApi.updateCurrentLesson(lessonId, courseId);
+            return response.data.lastAccessedLesson; // Chỉ lấy dữ liệu từ response.data
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to update current lesson');
+            return rejectWithValue(error.response?.data?.message || 'Không thể cập nhật bài học hiện tại');
         }
     }
 );
@@ -87,98 +93,89 @@ const userProgressSlice = createSlice({
     name: 'userProgress',
     initialState,
     reducers: {
-        resetProgress: (state) => initialState
+        resetProgress: () => initialState,
+        setLessonStatus: (state, action) => {
+            const { lessonId, status } = action.payload;
+            state.status[lessonId] = status;
+        }
     },
     extraReducers: (builder) => {
         builder
-            // ✅ Fetch current lesson
-            .addCase(fetchCurrentLesson.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
+            // Xử lý các action fulfilled cụ thể - ĐẶT TRƯỚC addMatcher
             .addCase(fetchCurrentLesson.fulfilled, (state, action) => {
-                state.loading = false;
-                state.currentLesson = action.payload;
-            })
-            .addCase(fetchCurrentLesson.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-
-            // Mark lesson as completed
-            .addCase(markLessonAsCompleted.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                state.current = action.payload;
             })
             .addCase(markLessonAsCompleted.fulfilled, (state, action) => {
-                state.loading = false;
-                state.completedLessons.push(action.payload);
-                state.courseProgress[action.payload.course] = action.payload;
-            })
-            .addCase(markLessonAsCompleted.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
+                const { courseId, completedLessons } = action.payload;
 
-            // Fetch lesson status
-            .addCase(fetchLessonStatus.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                completedLessons.forEach(lesson => {
+                    state.status[lesson.lesson._id] = true;
+                });
+
+                if (state.byCourse[courseId]) {
+                    state.byCourse[courseId] = {
+                        ...state.byCourse[courseId],
+                        progressPercentage: action.payload.progressPercentage,
+                        completedLessons
+                    };
+                }
             })
             .addCase(fetchLessonStatus.fulfilled, (state, action) => {
-                state.loading = false;
-                state.completedLessons = action.payload.isCompleted
-                    ? [...state.completedLessons, action.payload.lessonId]
-                    : state.completedLessons;
-            })
-            .addCase(fetchLessonStatus.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
-
-            // Fetch course progress
-            .addCase(fetchCourseProgress.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                const { lessonId, isCompleted } = action.payload;
+                state.status[lessonId] = isCompleted;
             })
             .addCase(fetchCourseProgress.fulfilled, (state, action) => {
-                state.loading = false;
-                state.courseProgress[action.payload.courseId] = action.payload;
-            })
-            .addCase(fetchCourseProgress.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
+                const { courseId, progress } = action.payload;
+                state.byCourse[courseId] = progress;
 
-            // Fetch overall progress
-            .addCase(fetchOverallProgress.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                progress.completedLessons?.forEach(lesson => {
+                    state.status[lesson.lesson._id] = true;
+                });
             })
             .addCase(fetchOverallProgress.fulfilled, (state, action) => {
-                state.loading = false;
-                state.overallProgress = action.payload;
-            })
-            .addCase(fetchOverallProgress.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
+                state.overview = action.payload;
 
-            // Update current lesson
-            .addCase(updateCurrentLesson.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                Object.values(action.payload).forEach(courseProgress => {
+                    courseProgress.completedLessons?.forEach(lesson => {
+                        state.status[lesson.lesson._id] = true;
+                    });
+                });
             })
             .addCase(updateCurrentLesson.fulfilled, (state, action) => {
-                state.loading = false;
-                state.currentLesson = action.payload;
+                state.current = action.payload;
+
+                if (action.payload.lesson) {
+                    state.status[action.payload.lesson._id] = false;
+                }
             })
-            .addCase(updateCurrentLesson.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            });
+
+            // Xử lý chung cho tất cả pending - ĐẶT SAU addCase
+            .addMatcher(
+                action => action.type.startsWith('userProgress/') && action.type.endsWith('/pending'),
+                (state) => {
+                    state.loading = true;
+                    state.error = null;
+                }
+            )
+
+            // Xử lý chung cho tất cả fulfilled - ĐẶT SAU addCase
+            .addMatcher(
+                action => action.type.startsWith('userProgress/') && action.type.endsWith('/fulfilled'),
+                (state) => {
+                    state.loading = false;
+                }
+            )
+
+            // Xử lý chung cho tất cả rejected - ĐẶT SAU addCase
+            .addMatcher(
+                action => action.type.startsWith('userProgress/') && action.type.endsWith('/rejected'),
+                (state, action) => {
+                    state.loading = false;
+                    state.error = action.payload;
+                }
+            );
     }
 });
 
-export const { resetProgress } = userProgressSlice.actions;
+export const { resetProgress, setLessonStatus } = userProgressSlice.actions;
 export default userProgressSlice.reducer;

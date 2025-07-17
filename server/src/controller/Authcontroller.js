@@ -1,5 +1,5 @@
 // src/controllers/authController.js
-import User from '../models/user.js'   // Đảm bảo đúng đường dẫn tới model
+import User from '../models/user'   // Đảm bảo đúng đường dẫn tới model
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
@@ -79,5 +79,62 @@ export const loginUser = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Đăng nhập thất bại', error: error.message });
+    }
+};
+// src/controller/Authcontroller.js
+
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-password');
+        res.json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        await user.deleteOne();
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+export const updateUserRole = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { role } = req.body;
+
+        if (!role || !['student', 'admin'].includes(role)) {
+            return res.status(400).json({ message: 'Vai trò không hợp lệ' });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+        }
+
+        user.role = role;
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Cập nhật vai trò thành công',
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
 };

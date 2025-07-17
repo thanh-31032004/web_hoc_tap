@@ -1,37 +1,29 @@
 import axiosInstance from '../../config/axios';
 
-// Mark lesson as completed
-export const completeLesson = async (lessonId) => {
-    const response = await axiosInstance.post('/progress/complete-lesson', { lessonId });
-    return response.data;
+const userProgressApi = {
+    // Đánh dấu bài học hoàn thành
+    markLessonAsCompleted: (lessonId) =>
+        axiosInstance.post('/progress/lessons/complete', { lessonId }),
+
+    // Lấy trạng thái bài học
+    getLessonStatus: (lessonId) =>
+        axiosInstance.get(`/progress/lessons/${lessonId}/status`),
+
+    // Lấy tiến độ khóa học
+    getCourseProgress: (courseId) =>
+        axiosInstance.get(`/progress/courses/${courseId}`),
+
+    // Lấy tổng quan tiến độ
+    getOverallProgress: () =>
+        axiosInstance.get('/progress/overview'),
+
+    // Cập nhật bài học hiện tại
+    updateCurrentLesson: (lessonId, courseId) =>
+        axiosInstance.put('/progress/current-lesson', { lessonId, courseId }),
+
+    // Lấy bài học hiện tại
+    getCurrentLesson: () =>
+        axiosInstance.get('/progress/current-lesson')
 };
 
-// Get lesson completion status
-export const getLessonStatus = async (lessonId) => {
-    const response = await axiosInstance.get(`/progress/status/${lessonId}`);
-    return response.data;
-};
-
-// Get course progress
-export const getCourseProgress = async (courseId) => {
-    const response = await axiosInstance.get(`/progress/course/${courseId}`);
-    return response.data;
-};
-
-// Get overall progress
-export const getOverallProgress = async () => {
-    const response = await axiosInstance.get('/progress/overall');
-    return response.data;
-};
-
-// Update current lesson
-export const updateCurrentLesson = async (data) => {
-    const response = await axiosInstance.put('/progress/current-lesson', data);
-    return response.data;
-};
-
-// ✅ Get current lesson for profile page
-export const getCurrentLesson = async () => {
-    const response = await axiosInstance.get('/progress/current-lesson');
-    return response.data;
-};
+export default userProgressApi;

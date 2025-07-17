@@ -6,7 +6,7 @@ import Layout from './layout/Layout'; // Đảm bảo đường dẫn đúng
 
 // Import các Pages của bạn
 import HomePage from './pages/HomePage';
-import CourseListPage from './pages/CourseListPage';
+
 import CourseDetailPage from './pages/CourseDetailPage';
 import LessonPage from './pages/LessonPage';
 import AiRoadmapPage from './pages/AiRoadmapPage';
@@ -24,6 +24,8 @@ import AdminLessonListPage from './pages/admin/lesson/lessonList';
 import AdminLessonAddPage from './pages/admin/lesson/lessonAdd';
 import AdminLessonEditPage from './pages/admin/lesson/lessonEdit';
 import CourseDeltailPage from './pages/CourseDetailPage';
+import UserListPage from './pages/admin/users/UserList';
+import ForbiddenPage from './pages/ForbiddenPage';
 
 // Import ProtectedRoute (nếu bạn đã có)
 
@@ -36,17 +38,17 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/courses" element={<CourseListPage />} />
+
           <Route path="/courses/:id" element={<CourseDetailPage />} />
-          <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
 
           <Route element={<ProtectedRoute />}>
+            <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
           </Route>
         </Route>
         {/* Các route dành cho Admin */}
-        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+        <Route path="/admin" element={<ProtectedRoute authorize={["admin"]}><AdminLayout /></ProtectedRoute>}>
           <Route path='' element={<AdminDashboardPage />} />
           <Route path="courses" element={<AdminCourseListPage />} />
           <Route path="courses/:id" element={<CourseDeltailPage />} />
@@ -55,8 +57,10 @@ function App() {
           <Route path="lessons" element={<AdminLessonListPage />} />
           <Route path="lessons/create" element={<AdminLessonAddPage />} />
           <Route path="lessons/edit/:id" element={<AdminLessonEditPage />} />
+          <Route path="users" element={<UserListPage />} />
 
         </Route>
+        <Route path="/403" element={<ForbiddenPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

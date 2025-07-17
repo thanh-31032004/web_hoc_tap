@@ -4,8 +4,8 @@ import userRoute from './userRoute';
 import courseRoute from './courseRoute';
 import authRouter from './authRoute';
 import lessonRouter from './lessonRoute';
-// import aiRoute from './aiRoute';
 import userProgressRoute from './userProgressroute';
+import totalrouter from './totalRoute';
 
 const router = Router();
 
@@ -14,9 +14,8 @@ router.use('/auth', authRouter);         // Tất cả các route trong authRout
 router.use('/users', userRoute);        // /api/users
 router.use('/courses', courseRoute);    // /api/courses
 router.use('/progress', userProgressRoute); // /api/progress
-// router.use('/ai', aiRoute);             // /api/ai
 router.use('/lessons', lessonRouter);
-// Bạn có thể thêm một route mặc định nếu muốn
+router.use('/admin', totalrouter); // /api/admin
 router.get('/', (req, res) => {
   res.send('API is running...');
 });

@@ -11,16 +11,22 @@ const UserProgressSchema = new mongoose.Schema({
         ref: 'Course',
         required: true
     },
-    completedLessons: [{
+    // THÊM: Theo dõi trạng thái từng bài học
+    lessonStatus: [{
         lesson: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Lesson'
+            ref: 'Lesson',
+            required: true
         },
-        completedAt: {
-            type: Date,
-            default: Date.now
-        }
+        status: {
+            type: String,
+            enum: ['chưa hoàn thành', 'đang học', 'hoàn thành'],
+            default: 'chưa hoàn thành'
+        },
+        // THÊM: Ngày hoàn thành (nếu có)
+        completedAt: Date
     }],
+    // GIỮ: Bài học cuối truy cập
     lastAccessedLesson: {
         lesson: {
             type: mongoose.Schema.Types.ObjectId,
@@ -31,6 +37,7 @@ const UserProgressSchema = new mongoose.Schema({
             default: Date.now
         }
     },
+    // GIỮ: Phần trăm hoàn thành
     progressPercentage: {
         type: Number,
         default: 0
@@ -39,14 +46,25 @@ const UserProgressSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Middleware để tự động cập nhật progressPercentage
-UserProgressSchema.pre('save', async function (next) {
-    if (this.isModified('completedLessons')) {
-        const totalLessons = await mongoose.model('Lesson')
-            .countDocuments({ course: this.course });
+// THÊM: Index cho truy vấn nhanh
+UserProgressSchema.index({ user: 1, course: 1 });
 
-        this.progressPercentage = totalLessons > 0
-            ? (this.completedLessons.length / totalLessons) * 100
+// CẢI THIỆN: Middleware tối ưu hơn
+UserProgressSchema.pre('save', async function (next) {
+    if (this.isModified('lessonStatus')) {
+        // Chỉ đếm bài học đã hoàn thành
+        const completedCount = this.lessonStatus.filter(
+            ls => ls.status === 'hoàn thành'
+        ).length;
+
+        // Lấy tổng số bài học (cache nếu cần)
+        if (!this.totalLessons) {
+            this.totalLessons = await mongoose.model('Lesson')
+                .countDocuments({ course: this.course });
+        }
+
+        this.progressPercentage = this.totalLessons > 0
+            ? Math.round((completedCount / this.totalLessons) * 100)
             : 0;
     }
     next();

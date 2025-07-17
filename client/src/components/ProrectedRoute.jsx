@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, authorize = [] }) => {
     // 2. Nếu có yêu cầu phân quyền và vai trò của người dùng không khớp
     if (authorize.length > 0 && !authorize.includes(userRole)) {
         // Nếu không có quyền, chuyển hướng về trang chủ hoặc trang 403 Forbidden
-        return <Navigate to="/" replace />; // Hoặc bạn có thể tạo trang 403
+        return <Navigate to="/403" replace />; // Hoặc bạn có thể tạo trang 403
     }
 
     // Nếu đã đăng nhập và có quyền, render children (hoặc Outlet nếu dùng nested routes)

@@ -55,27 +55,28 @@ export const getCourseById = async (req, res) => {
     try {
         const course = await Course.findById(req.params.id);
 
-        if (course) {
-            const modules = await Module.find({ course: course._id }).sort('order');
-
-            const courseWithContent = {
-                ...course.toObject(),
-                modules: await Promise.all(
-                    modules.map(async (mod) => {
-                        const lessons = await Lesson.find({ module: mod._id, course: course._id }).sort('order');
-                        return { ...mod.toObject(), lessons };
-                    })
-                ),
-            };
-            res.status(200).json(courseWithContent);
-        } else {
-            res.status(404).json({ message: 'Không tìm thấy khóa học' });
+        if (!course) {
+            return res.status(404).json({ message: 'Không tìm thấy khóa học' });
         }
+
+        // Lấy tất cả lessons của course, không cần phân theo module
+        const lessons = await Lesson.find({ course: course._id }).sort('order');
+
+        const courseWithLessons = {
+            ...course.toObject(),
+            lessons,
+        };
+
+        return res.status(200).json(courseWithLessons);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Lỗi server khi lấy chi tiết khóa học', error: error.message });
+        return res.status(500).json({
+            message: 'Lỗi server khi lấy chi tiết khóa học',
+            error: error.message,
+        });
     }
 };
+
 
 /**
  * @desc    Cập nhật thông tin khóa học
