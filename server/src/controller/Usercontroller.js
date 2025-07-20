@@ -64,7 +64,6 @@ export const updateUserProfile = async (req, res) => {
                 learningPreferences: updatedUser.learningPreferences,
                 skillLevel: updatedUser.skillLevel,
                 learningGoals: updatedUser.learningGoals,
-                token: generateToken(updatedUser._id), // Tạo lại token nếu cần cập nhật (ví dụ: vai trò)
             });
         } else {
             res.status(404).json({ message: 'Không tìm thấy người dùng' });

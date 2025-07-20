@@ -2,120 +2,117 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-    AppBar,
-    Toolbar,
-    Typography,
-    IconButton,
-    Avatar,
+    Layout,
     Menu,
-    MenuItem,
+    Button,
+    Avatar,
+    Dropdown,
+    Typography,
+    Space,
     Tooltip,
-    Box,
-    Button
-} from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
+} from 'antd';
+import {
+    UserOutlined,
+    LogoutOutlined,
+    ProfileOutlined,
+    RobotOutlined,
+} from '@ant-design/icons';
 import { logout } from '../features/auth/authSlide';
 
-function Header() {
+const { Header: AntHeader } = Layout;
+
+const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    const [anchorEl, setAnchorEl] = useState(null);
-
-    const handleMenuOpen = (event) => {
-        setAnchorEl(event.currentTarget);
+    const handleMenuClick = ({ key }) => {
+        setMenuOpen(false);
+        if (key === 'profile') {
+            navigate('/profile');
+        } else if (key === 'logout') {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            dispatch(logout());
+            navigate('/login');
+            window.location.reload();
+        }
     };
 
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleGoToProfile = () => {
-        handleMenuClose();
-        navigate('/profile');
-    };
-
-    const handleLogout = () => {
-        handleMenuClose();
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        dispatch(logout());
-        navigate('/login');
-        window.location.reload();
-    };
+    const menuItems = [
+        {
+            key: 'profile',
+            icon: <ProfileOutlined />,
+            label: 'Thông tin cá nhân',
+        },
+        {
+            key: 'logout',
+            icon: <LogoutOutlined />,
+            label: 'Đăng xuất',
+        },
+    ];
 
     const renderAvatar = () => {
         if (user?.avatar) {
-            return <Avatar alt={user.username} src={user.avatar} />;
+            return <Avatar src={user.avatar} />;
         }
         const initial = user?.username?.[0]?.toUpperCase() || '?';
         return <Avatar>{initial}</Avatar>;
     };
 
     return (
-        <AppBar position="static" sx={{ backgroundColor: '#2196f3', color: 'white' }}>
-            <Toolbar>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    <Link
-                        to="/"
-                        style={{
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            display: 'flex',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <SchoolIcon sx={{ mr: 1 }} />
-                        Học Cùng AI
-                    </Link>
-                </Typography>
-                <Button color="inherit" component={Link} to="/ai-roadmap">Lộ trình AI</Button>
+        <AntHeader
+            style={{
+                backgroundColor: '#2196f3',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0 24px',
+            }}
+        >
+            <Space size="large">
+                <Link to="/" style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+                    <RobotOutlined style={{ marginRight: 8 }} />
+                    Học Cùng AI
+                </Link>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    {!isAuthenticated ? (
-                        <>
-                            <Button color="inherit" component={Link} to="/login">
-                                Đăng nhập
-                            </Button>
-                            <Button color="inherit" component={Link} to="/register">
-                                Đăng ký
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Tooltip title={user?.username || 'Tài khoản'}>
-                                <IconButton onClick={handleMenuOpen} color="inherit" sx={{ p: 0 }}>
-                                    {renderAvatar()}
-                                </IconButton>
-                            </Tooltip>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleMenuClose}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                            >
-                                <MenuItem onClick={handleGoToProfile}>
-                                    Thông tin cá nhân
-                                </MenuItem>
-                                <MenuItem onClick={handleLogout}>
-                                    Đăng xuất
-                                </MenuItem>
-                            </Menu>
-                        </>
-                    )}
-                </Box>
-            </Toolbar>
-        </AppBar>
+                <Link to="/ai-roadmap" style={{ color: 'white', fontSize: 16 }}>
+                    Lộ trình AI
+                </Link>
+            </Space>
+
+            <Space size="middle">
+                {!isAuthenticated ? (
+                    <>
+                        <Link to="/login">
+                            <Button ghost>Đăng nhập</Button>
+                        </Link>
+                        <Link to="/register">
+                            <Button ghost>Đăng ký</Button>
+                        </Link>
+                    </>
+                ) : (
+                    <Dropdown
+                        menu={{ items: menuItems, onClick: handleMenuClick }}
+                        placement="bottomRight"
+                        trigger={['click']}
+                        open={menuOpen}
+                        onOpenChange={setMenuOpen}
+                    >
+                        <Tooltip title={user?.username}>
+                            <Avatar
+                                style={{ cursor: 'pointer', backgroundColor: '#fff', color: '#1890ff' }}
+                                icon={<UserOutlined />}
+                                src={user?.avatar}
+                            />
+                        </Tooltip>
+                    </Dropdown>
+                )}
+            </Space>
+        </AntHeader>
     );
-}
+};
 
 export default Header;

@@ -6,6 +6,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { createCourse } from '../../../features/course/courseSlide';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const categories = [
     'Web Development',
@@ -30,6 +31,7 @@ function AdminCourseCreatePage() {
     const onSubmit = async (data) => {
         const result = await dispatch(createCourse(data));
         if (createCourse.fulfilled.match(result)) {
+            toast.success("Tạo khóa học thành công!");
             navigate('/admin/courses');
         }
     };

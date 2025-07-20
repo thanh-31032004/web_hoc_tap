@@ -15,7 +15,7 @@ const LessonSchema = new mongoose.Schema({
         required: function () { return this.contentType === 'text'; }
     },
     order: { type: Number, required: true },
-    duration: { type: Number, default: 0 }
+    duration: { type: Number, default: 0, min: 1 },
 }, { timestamps: true });
 
 const Lesson = mongoose.model('Lesson', LessonSchema);

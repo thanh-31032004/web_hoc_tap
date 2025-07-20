@@ -15,6 +15,7 @@ import {
     Box,
     Typography,
 } from '@mui/material';
+import { toast } from 'react-toastify';
 
 const AdminLessonEditPage = () => {
     const { id } = useParams();
@@ -46,6 +47,7 @@ const AdminLessonEditPage = () => {
         e.preventDefault();
         // console.log('Submit data:', formData);
         await dispatch(updateLesson({ id, data: formData }));
+        toast.success("Cập nhật bài học thành công!");
         navigate('/admin/lessons');
     };
 

@@ -14,6 +14,7 @@ import {
     Box,
     Typography,
 } from '@mui/material';
+import { toast } from 'react-toastify';
 
 const AdminLessonAddPage = () => {
     const [formData, setFormData] = useState({
@@ -43,6 +44,7 @@ const AdminLessonAddPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         await dispatch(createLesson(formData));
+        toast.success("Thêm bài học thành công!");
         navigate('/admin/lessons');
     };
 

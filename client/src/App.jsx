@@ -26,6 +26,7 @@ import AdminLessonEditPage from './pages/admin/lesson/lessonEdit';
 import CourseDeltailPage from './pages/CourseDetailPage';
 import UserListPage from './pages/admin/users/UserList';
 import ForbiddenPage from './pages/ForbiddenPage';
+import EditProfilePage from './pages/SettingProfile';
 
 // Import ProtectedRoute (nếu bạn đã có)
 
@@ -44,6 +45,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings/profile" element={<EditProfilePage />} />
+
             <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
           </Route>
         </Route>

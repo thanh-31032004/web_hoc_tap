@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../config/axios';
 import {
-    Box,
     Typography,
-    CircularProgress,
+    Spin,
     Card,
-    CardContent,
-    Divider,
     Button,
-    Grid,
+    Row,
+    Col,
     Avatar,
-    Stack,
-    Paper,
+    Space,
+    Divider,
     Alert,
-    LinearProgress,
-} from '@mui/material';
-import { deepOrange } from '@mui/material/colors';
-import SchoolIcon from '@mui/icons-material/School';
-import PersonIcon from '@mui/icons-material/Person';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import BookIcon from '@mui/icons-material/Book';
+    Progress,
+    Descriptions,
+    Pagination,
+    Input,
+} from 'antd';
+import {
+    UserOutlined,
+    ArrowRightOutlined,
+    BookOutlined,
+    TeamOutlined,
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../config/axios';
+
+const { Title, Text } = Typography;
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -31,6 +35,10 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 3;
+
     const token = localStorage.getItem('token');
     const isAuthenticated = !!token;
 
@@ -40,16 +48,12 @@ const ProfilePage = () => {
             const storedUser = JSON.parse(localStorage.getItem('user'));
             setUser(storedUser);
 
-            // Lấy danh sách courses
             const resCourses = await axiosInstance.get('/courses');
             setCourses(resCourses.data);
 
-            // Lấy progress tất cả khóa học
             const resProgress = await axiosInstance.get('/progress/all');
             const merged = mergeProgressData(resProgress.data);
             setProgressAll(merged);
-            console.log('✅ Merged Progress:', merged);
-
         } catch (err) {
             console.error(err);
             setError('Không thể tải dữ liệu hồ sơ.');
@@ -58,10 +62,8 @@ const ProfilePage = () => {
         }
     };
 
-    // Hàm merge progress trùng courseId
     const mergeProgressData = (progressList) => {
         const groupByCourse = {};
-
         for (const item of progressList) {
             const id = item.courseId;
             if (!groupByCourse[id]) {
@@ -79,11 +81,9 @@ const ProfilePage = () => {
             for (const it of items) {
                 progressPercentage = Math.max(progressPercentage, it.progressPercentage || 0);
                 totalLessons = it.totalLessons || totalLessons;
-
                 if (it.completedLessons) {
                     completedLessons = [...completedLessons, ...it.completedLessons];
                 }
-
                 if (it.lastAccessedLesson) {
                     if (
                         !lastAccessedLesson ||
@@ -114,157 +114,154 @@ const ProfilePage = () => {
 
     if (!isAuthenticated) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
-                <Alert severity="error">Vui lòng đăng nhập để xem trang cá nhân.</Alert>
-            </Box>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 50 }}>
+                <Alert message="Vui lòng đăng nhập để xem trang cá nhân." type="error" showIcon />
+            </div>
         );
     }
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="70vh">
-                <CircularProgress />
-            </Box>
+            <div style={{ textAlign: 'center', padding: 100 }}>
+                <Spin size="large" />
+            </div>
         );
     }
 
+    const filteredProgress = progressAll
+        .filter(p => {
+            const course = courses.find(c => c._id === p.courseId);
+            const title = course?.title?.toLowerCase() || '';
+            return title.includes(searchTerm.toLowerCase());
+        })
+        .filter(p => p.progressPercentage > 0);
+
+    const paginatedProgress = filteredProgress.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
+
     return (
-        <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 4, color: '#1a237e' }}>
+        <div style={{ padding: '24px', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
+            <Title level={2} style={{ marginBottom: 32, color: '#1a237e' }}>
                 Tổng quan học tập
-            </Typography>
-            <Grid container spacing={4}>
-                <Grid item xs={12} md={4}>
-                    <Card elevation={4}>
-                        <CardContent>
-                            <Stack spacing={2} alignItems="center">
-                                <Avatar
-                                    sx={{
-                                        bgcolor: deepOrange[500],
-                                        width: 80,
-                                        height: 80,
-                                        fontSize: '2.5rem',
-                                    }}
-                                >
-                                    {user?.username
-                                        ? user.username.charAt(0).toUpperCase()
-                                        : <PersonIcon />}
-                                </Avatar>
-                                <Typography variant="h5" fontWeight="bold">
-                                    {user?.username || 'Học viên'}
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    {user?.email || 'Không có email'}
-                                </Typography>
-
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={() => navigate('/settings/profile')}
-                                >
-                                    Chỉnh sửa hồ sơ
-                                </Button>
-
-                                {user?.role === 'admin' && (
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        size="small"
-                                        onClick={() => navigate('/admin')}
-                                    >
-                                        Đến trang Admin
-                                    </Button>
-                                )}
-                            </Stack>
-                            <Divider sx={{ my: 2 }} />
-                        </CardContent>
-
-                    </Card>
-                </Grid>
-
-                <Grid item xs={12} md={8}>
-                    {progressAll.filter(p => p.progressPercentage > 0).length === 0 ? (
-                        <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-                            <Typography variant="h6" gutterBottom>
-                                Chào mừng bạn quay trở lại!
-                            </Typography>
-                            <Typography color="text.secondary" sx={{ mb: 2 }}>
-                                Bạn chưa bắt đầu học khóa nào cả. Hãy khám phá các khóa học của chúng tôi nhé!
-                            </Typography>
-                            <Button
-                                variant="contained"
-                                startIcon={<BookIcon />}
-                                onClick={() => navigate('/courses')}
+            </Title>
+            <Row gutter={24}>
+                <Col xs={24} md={8}>
+                    <Card>
+                        <Space direction="vertical" align="center" style={{ width: '100%' }}>
+                            <Avatar
+                                size={80}
+                                icon={<UserOutlined />}
+                                style={{ backgroundColor: '#fa541c' }}
                             >
+                                {user?.username?.[0]?.toUpperCase()}
+                            </Avatar>
+                            <Title level={4}>{user?.username || 'Học viên'}</Title>
+                            <Descriptions size="small" column={1} style={{ textAlign: 'left', width: '100%' }}>
+                                <Descriptions.Item label="Email">{user?.email || 'Không có email'}</Descriptions.Item>
+                                <Descriptions.Item label="Vai trò">
+                                    {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Cấp độ  ">{user?.skillLevel || 'Không rõ'}</Descriptions.Item>
+                                <Descriptions.Item label="Mục tiêu">{user?.learningGoals || 'Không rõ'}</Descriptions.Item>
+                                <Descriptions.Item label="Sở thích học tập">{user?.learningPreferences || 'Không rõ'}</Descriptions.Item>
+                                <Descriptions.Item label="Số khóa học đang học">{progressAll.length}</Descriptions.Item>
+                                <Descriptions.Item label="Tổng bài học đã hoàn thành">
+                                    {progressAll.reduce((acc, p) => acc + (p.completedLessons?.length || 0), 0)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Tiến độ trung bình">
+                                    {progressAll.length > 0
+                                        ? `${Math.round(progressAll.reduce((acc, p) => acc + (p.progressPercentage || 0), 0) / progressAll.length)}%`
+                                        : '0%'}
+                                </Descriptions.Item>
+                            </Descriptions>
+                            <Button onClick={() => navigate('/settings/profile')}>
+                                Chỉnh sửa hồ sơ
+                            </Button>
+                            {user?.role === 'admin' && (
+                                <Button type="primary" onClick={() => navigate('/admin')}>
+                                    Đến trang Admin
+                                </Button>
+                            )}
+                        </Space>
+                    </Card>
+                </Col>
+
+                <Col xs={24} md={16}>
+                    <Card style={{ marginBottom: 24 }}>
+                        <Input.Search
+                            placeholder="Tìm kiếm khóa học..."
+                            allowClear
+                            onChange={e => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            style={{ marginBottom: 16 }}
+                        />
+                    </Card>
+
+                    {filteredProgress.length === 0 ? (
+                        <Card>
+                            <Title level={4}>Không tìm thấy khóa học phù hợp.</Title>
+                            <Text>
+                                Thử lại với từ khóa khác hoặc khám phá thêm khóa học nhé!
+                            </Text>
+                            <Divider />
+                            <Button type="primary" icon={<BookOutlined />} onClick={() => navigate('/')}>
                                 Khám phá khóa học
                             </Button>
-                        </Paper>
+                        </Card>
                     ) : (
-                        progressAll
-                            .filter(p => p.progressPercentage > 0)
-                            .map(progress => {
-                                const course = courses.find(c => c._id === progress.courseId);
-                                const courseTitle = course?.title || 'Khóa học';
-                                const completedCount = progress.completedLessons.length;
-                                const totalLessons = progress.totalLessons || 0;
-                                const percentage =
-                                    totalLessons > 0
-                                        ? (completedCount / totalLessons) * 100
-                                        : 0;
-                                const lastLessonTitle = progress.lastAccessedLesson?.lesson?.title || 'Chưa có bài học gần nhất';
-                                const lastLessonId = progress.lastAccessedLesson?.lesson?._id;
+                        paginatedProgress.map(progress => {
+                            const course = courses.find(c => c._id === progress.courseId);
+                            const courseTitle = course?.title || 'Khóa học';
+                            const completedCount = progress.completedLessons.length;
+                            const totalLessons = progress.totalLessons || 0;
+                            const percentage = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+                            const lastLessonTitle = progress.lastAccessedLesson?.lesson?.title || 'Chưa có bài học gần nhất';
+                            const lastLessonId = progress.lastAccessedLesson?.lesson?._id;
 
-                                return (
-                                    <Card key={progress.courseId} elevation={4} sx={{ mb: 3 }}>
-                                        <CardContent>
-                                            <Typography variant="h6" fontWeight="medium" gutterBottom>
-                                                Tiến độ học tập
-                                            </Typography>
-                                            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                                                <SchoolIcon color="primary" />
-                                                <Typography
-                                                    variant="h5"
-                                                    fontWeight="bold"
-                                                    color="primary.main"
-                                                >
-                                                    {courseTitle}
-                                                </Typography>
-                                            </Stack>
-
-                                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                                Bài học gần nhất: <strong>{lastLessonTitle}</strong>
-                                            </Typography>
-
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={percentage}
-                                                sx={{ height: 8, borderRadius: 4, mb: 1 }}
-                                            />
-                                            <Typography variant="body2" color="text.secondary">
-                                                {completedCount}/{totalLessons} bài học ({Math.round(percentage)}%)
-                                            </Typography>
-
-                                            <Divider sx={{ my: 2 }} />
-
-                                            <Button
-                                                variant="contained"
-                                                size="large"
-                                                endIcon={<ArrowForwardIcon />}
-                                                disabled={!lastLessonId}
-                                                onClick={() =>
-                                                    navigate(`/courses/${progress.courseId}/lessons/${lastLessonId}`)
-                                                }
-                                            >
-                                                Vào học ngay
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })
+                            return (
+                                <Card key={progress.courseId} style={{ marginBottom: 24 }}>
+                                    <Space direction="vertical" style={{ width: '100%' }}>
+                                        <Space>
+                                            <TeamOutlined style={{ color: '#1890ff' }} />
+                                            <Title level={5}>{courseTitle}</Title>
+                                        </Space>
+                                        <Text>Bài học gần nhất: <strong>{lastLessonTitle}</strong></Text>
+                                        <Progress percent={Math.round(percentage)} status="active" />
+                                        <Text type="secondary">{completedCount}/{totalLessons} bài học</Text>
+                                        <Divider />
+                                        <Button
+                                            type="primary"
+                                            icon={<ArrowRightOutlined />}
+                                            disabled={!lastLessonId}
+                                            onClick={() =>
+                                                navigate(`/courses/${progress.courseId}/lessons/${lastLessonId}`)
+                                            }
+                                        >
+                                            Vào học ngay
+                                        </Button>
+                                    </Space>
+                                </Card>
+                            );
+                        })
                     )}
-                </Grid>
-            </Grid>
-        </Box>
+
+                    {filteredProgress.length > pageSize && (
+                        <div style={{ textAlign: 'center', marginTop: 24 }}>
+                            <Pagination
+                                current={currentPage}
+                                pageSize={pageSize}
+                                total={filteredProgress.length}
+                                onChange={page => setCurrentPage(page)}
+                            />
+                        </div>
+                    )}
+                </Col>
+            </Row>
+        </div>
     );
 };
 

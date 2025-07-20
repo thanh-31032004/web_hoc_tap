@@ -12,7 +12,7 @@ const CourseSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Mô tả khóa học là bắt buộc']
     },
-    thumbnail: { // Đường dẫn tới ảnh đại diện của khóa học
+    thumbnail: {
         type: String,
         required: [true, 'Ảnh đại diện là bắt buộc'],
     },

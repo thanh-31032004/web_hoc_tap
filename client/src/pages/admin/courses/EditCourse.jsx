@@ -6,6 +6,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateCourse, fetchCourses } from '../../../features/course/courseSlide';
+import { toast } from 'react-toastify';
 
 const categories = [
     'Web Development',
@@ -55,6 +56,7 @@ function AdminCourseEditPage() {
     const onSubmit = async (data) => {
         const result = await dispatch(updateCourse({ id, data }));
         if (updateCourse.fulfilled.match(result)) {
+            toast.success("Cập nhật khóa học thành công!");
             navigate('/admin/courses');
         }
     };

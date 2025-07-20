@@ -1,8 +1,18 @@
+// src/pages/LoginPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { TextField, Button, Typography, Container, Box, Alert, CircularProgress } from '@mui/material';
 import { login } from '../features/auth/authSlide';
+import {
+    Form,
+    Input,
+    Button,
+    Typography,
+    Alert,
+    Spin
+} from 'antd';
+import { toast } from 'react-toastify';
+const { Title, Text } = Typography;
 
 function LoginPage() {
     const [email, setEmail] = useState('');
@@ -14,33 +24,70 @@ function LoginPage() {
 
     useEffect(() => {
         if (isAuthenticated) {
+            toast.success("Đăng nhập thành công!");
             navigate('/');
             window.location.reload();
         }
     }, [isAuthenticated, navigate]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = () => {
         dispatch(login({ email, password }));
     };
 
     return (
-        <Container maxWidth="sm">
-            <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography variant="h4" component="h1" gutterBottom>Đăng nhập</Typography>
-                {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
-                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-                    <TextField fullWidth required label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <TextField fullWidth required label="Mật khẩu" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={loading}>
-                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Đăng nhập'}
+        <div style={{ maxWidth: 400, margin: 'auto', paddingTop: 80 }}>
+            <Title level={2} style={{ textAlign: 'center' }}>Đăng nhập</Title>
+
+            {error && (
+                <Alert
+                    message={error}
+                    type="error"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                />
+            )}
+
+            <Form layout="vertical" onFinish={handleSubmit}>
+                <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+                >
+                    <Input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Nhập email"
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label="Mật khẩu"
+                    name="password"
+                    rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                >
+                    <Input.Password
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Nhập mật khẩu"
+                    />
+                </Form.Item>
+
+                <Form.Item>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        loading={loading}
+                    >
+                        Đăng nhập
                     </Button>
-                    <Typography variant="body2" align="center">
-                        Bạn chưa có tài khoản? <RouterLink to="/register">Đăng ký ngay</RouterLink>
-                    </Typography>
-                </Box>
-            </Box>
-        </Container>
+                </Form.Item>
+
+                <Form.Item style={{ textAlign: 'center', marginBottom: 0 }}>
+                    <Text>Chưa có tài khoản? <RouterLink to="/register">Đăng ký ngay</RouterLink></Text>
+                </Form.Item>
+            </Form>
+        </div>
     );
 }
 

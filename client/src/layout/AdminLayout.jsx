@@ -1,49 +1,57 @@
-// client/src/components/layout/AdminLayout.jsx
 import React from 'react';
-import { Box, CssBaseline, AppBar, Toolbar, Typography } from '@mui/material';
-import { Outlet } from 'react-router-dom'; // Outlet để render nested routes
-import AdminSidebar from '../components/Sidebar'; // <-- Import AdminSidebar
+import { Layout, Typography } from 'antd';
+import { Outlet } from 'react-router-dom';
+import AdminSidebar from '../components/Sidebar'; // Sidebar mới dùng antd
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+const { Header, Sider, Content } = Layout;
 
-const drawerWidth = 240; // Đảm bảo chiều rộng khớp với AdminSidebar
-
-function AdminLayout() {
+const AdminLayout = () => {
     return (
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline />
-            <AppBar
-                position="fixed"
-                sx={{
-                    width: `calc(100% - ${drawerWidth}px)`,
-                    ml: `${drawerWidth}px`,
-                    zIndex: (theme) => theme.zIndex.drawer + 1, // Đảm bảo AppBar nằm trên Sidebar
-                    bgcolor: '#1976d2' // Màu xanh Material Design cho AppBar
+        <Layout style={{ minHeight: '100vh' }}>
+            {/* Sidebar bên trái */}
+            <Sider
+                width={240}
+                style={{
+                    background: '#001529',
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    overflow: 'auto',
                 }}
             >
-                <Toolbar>
-                    <Typography variant="h6" noWrap component="div">
-                        Admin Dashboard
-                    </Typography>
-                    {/* Tùy chọn: Thêm các nút khác ở đây, ví dụ nút quay về trang người dùng */}
-                </Toolbar>
-            </AppBar>
+                <AdminSidebar />
+            </Sider>
 
-            <AdminSidebar /> {/* <-- Sử dụng AdminSidebar component ở đây */}
+            {/* Phần còn lại: Header + Content */}
+            <Layout style={{ marginLeft: 240 }}>
+                <ToastContainer position="top-right" autoClose={3000} />
 
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    bgcolor: 'background.default',
-                    p: 3,
-                    width: { sm: `calc(100% - ${drawerWidth}px)` },
-                    mt: 8 // Khoảng cách từ trên xuống để tránh bị AppBar che
-                }}
-            >
-                <Toolbar /> {/* Nơi này không cần thiết nếu dùng mt: 8 ở Box main, nhưng thường được dùng để tạo khoảng trống bằng chiều cao của AppBar */}
-                <Outlet /> {/* Nơi các nested routes (ví dụ: AdminCourseListPage) sẽ được render */}
-            </Box>
-        </Box>
+                <Header
+                    style={{
+                        background: '#1677ff',
+                        padding: '0 24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: 64,
+                    }}
+                >
+                </Header>
+
+                <Content
+                    style={{
+                        margin: '24px 16px',
+                        padding: 24,
+                        background: '#f5f5f5',
+                        minHeight: 280,
+                    }}
+                >
+                    <Outlet />
+                </Content>
+            </Layout>
+        </Layout>
     );
-}
+};
 
 export default AdminLayout;
